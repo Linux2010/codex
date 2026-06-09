@@ -213,7 +213,7 @@ async fn get_git_remotes(runner: &dyn WorkspaceCommandExecutor, cwd: &Path) -> O
 ///
 /// The lookup prefers remote-tracking refs over local branches so feature-only clones and stale
 /// local `main` branches do not inflate the status-line diff. When no remote default is available,
-/// local `main` or `master` is used as a last resort.
+/// local `main`, `master`, or `trunk` is used as a last resort.
 async fn get_default_branch(
     runner: &dyn WorkspaceCommandExecutor,
     cwd: &Path,
@@ -299,12 +299,12 @@ async fn get_remote_default_branch_from_remote_show(
     None
 }
 
-/// Falls back to local `main` or `master` when no remote default branch can be found.
+/// Falls back to local `main`, `master`, or `trunk` when no remote default branch can be found.
 async fn get_default_branch_local(
     runner: &dyn WorkspaceCommandExecutor,
     cwd: &Path,
 ) -> Option<DefaultBranch> {
-    for candidate in ["main", "master"] {
+    for candidate in ["main", "master", "trunk"] {
         let local_ref = format!("refs/heads/{candidate}");
         if git_ref_exists(runner, cwd, &local_ref).await {
             return Some(DefaultBranch {

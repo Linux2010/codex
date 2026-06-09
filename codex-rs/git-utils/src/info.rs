@@ -473,7 +473,7 @@ async fn get_git_remotes(cwd: &Path) -> Option<Vec<String>> {
 /// Preference order:
 /// 1) The symbolic ref at `refs/remotes/<remote>/HEAD` for the first remote (origin prioritized)
 /// 2) `git remote show <remote>` parsed for "HEAD branch: <name>"
-/// 3) Local fallback to existing `main` or `master` if present
+/// 3) Local fallback to existing `main`, `master`, or `trunk` if present
 async fn get_default_branch(cwd: &Path) -> Option<String> {
     // Prefer the first remote (with origin prioritized)
     let remotes = get_git_remotes(cwd).await.unwrap_or_default();
@@ -522,8 +522,8 @@ async fn get_default_branch(cwd: &Path) -> Option<String> {
 /// Determine the repository's default branch name, if available.
 ///
 /// This inspects remote configuration first (including the symbolic `HEAD`
-/// reference) and falls back to common local defaults such as `main` or
-/// `master`. Returns `None` when the information cannot be determined, for
+/// reference) and falls back to common local defaults such as `main`,
+/// `master`, or `trunk`. Returns `None` when the information cannot be determined, for
 /// example when the current directory is not inside a Git repository.
 pub async fn default_branch_name(cwd: &Path) -> Option<String> {
     get_default_branch(cwd).await
@@ -531,7 +531,7 @@ pub async fn default_branch_name(cwd: &Path) -> Option<String> {
 
 /// Attempt to determine the repository's default branch name from local branches.
 async fn get_default_branch_local(cwd: &Path) -> Option<String> {
-    for candidate in ["main", "master"] {
+    for candidate in ["main", "master", "trunk"] {
         if let Some(verify) = run_git_command_with_timeout(
             &[
                 "rev-parse",
